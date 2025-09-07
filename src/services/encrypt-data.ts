@@ -4,6 +4,8 @@
  * Uses AES-256-GCM with HEX key - Accepts any data type (objects, arrays, strings, numbers, etc.)
  */
 
+import { shouldShowSecurityWarning, markSecurityWarningAsShown } from '../shared/global-state.js';
+
 // Type definitions
 interface CryptoModule {
     randomBytes: (size: number) => Buffer;
@@ -22,9 +24,6 @@ class DataSecurityService {
     private keyPromise?: Promise<CryptoKey>;
     private nodeCrypto?: CryptoModule;
     private nodeKey?: Buffer;
-
-    // Static flag to show security warning only once
-    private static _warningShown: boolean = false;
 
     /**
      * 🔒 Security: Constant-time string comparison to prevent timing attacks
@@ -74,8 +73,8 @@ class DataSecurityService {
             );
         }
 
-        // Security reminder for development (only once per process)
-        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV !== 'production' && !DataSecurityService._warningShown) {
+        // Security reminder for development (only once per process - shared across all securex services)
+        if (shouldShowSecurityWarning()) {
             console.warn(
                 "🔐 SECURITY REMINDER:\n" +
                 "• Rotate encryption keys regularly\n" +
@@ -83,7 +82,7 @@ class DataSecurityService {
                 "• Use environment variables for key storage\n" +
                 "• Consider key management services for production"
             );
-            DataSecurityService._warningShown = true;
+            markSecurityWarningAsShown();
         }
 
         this.secretKey = secretKey;

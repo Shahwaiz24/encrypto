@@ -1,12 +1,12 @@
-# encrypto
+# securex
 
-A military-grade encryption library that makes your tokens and data virtually unbreakable. Unlike JWT and other popular packages where tokens can be easily decoded by anyone, encrypto uses AES-256-GCM encryption - the same standard used by governments and banks worldwide.
+A military-grade encryption library that makes your tokens and data virtually unbreakable. Unlike JWT and other popular packages where tokens can be easily decoded by anyone, securex uses AES-256-GCM encryption - the same standard used by governments and banks worldwide.
 
-**Why encrypto exists:** Most developers use JWT tokens thinking they're secure, but JWT tokens are just base64 encoded - anyone can decode them instantly. Even bcrypt and other hashing libraries have known vulnerabilities. We built encrypto to solve this critical security gap.
+**Why securex exists:** Most developers use JWT tokens thinking they're secure, but JWT tokens are just base64 encoded - anyone can decode them instantly. Even bcrypt and other hashing libraries have known vulnerabilities. We built securex to solve this critical security gap.
 
 **Quantum-resistant security:** Even if a hacker steals your encrypted data and uses the most powerful quantum computers available, it would take over 100 years to crack a single token. That's the power of true AES-256-GCM encryption.
 
-## Why Choose encrypto?
+## Why Choose securex?
 
 ### 🛡️ **Unbreakable Security**
 - **AES-256-GCM encryption** - Same standard used by US military and banks
@@ -21,7 +21,7 @@ A military-grade encryption library that makes your tokens and data virtually un
 | **JWT** | ❌ Base64 (Anyone can decode) | 0 seconds | 100+ years with quantum computers |
 | **bcrypt** | ⚠️ Known vulnerabilities | Minutes with rainbow tables | Impossible without secret key |
 | **crypto-js** | ⚠️ Outdated algorithms | Hours with modern hardware | Military-grade AES-256-GCM |
-| **encrypto** | ✅ Military-grade | **100+ years** | Uncrackable even by hackers |
+| **securex** | ✅ Military-grade | **100+ years** | Uncrackable even by hackers |
 
 ### 🚀 **Developer-Friendly Features**
 - **JWT-compatible API** - Functions like `sign()` and `verify()` work just like JWT
@@ -41,7 +41,7 @@ A military-grade encryption library that makes your tokens and data virtually un
 ## Install
 
 ```bash
-npm install encrypto
+npm install securex
 ```
 
 ## Migration Notes
@@ -55,7 +55,7 @@ npm install encrypto
 Generate a secure 64-character hex key for encryption.
 
 ```javascript
-import { generateKey } from 'encrypto';
+import { generateKey } from 'securex';
 
 const secretKey = await generateKey();
 console.log(secretKey); // e5aadb9a85519a11f4c8... (64 characters)
@@ -66,7 +66,7 @@ console.log(secretKey); // e5aadb9a85519a11f4c8... (64 characters)
 Encrypt a string token with AES-256-GCM.
 
 ```javascript
-import { encryptToken, decryptToken } from 'encrypto';
+import { encryptToken, decryptToken } from 'securex';
 
 const secretKey = await generateKey();
 const token = "my-sensitive-token";
@@ -88,7 +88,7 @@ Sign a token with expiration (JWT alternative). Similar to `jwt.sign()`.
 * `expiresIn` - Expiry in minutes (default: 60)
 
 ```javascript
-import { sign, verify } from 'encrypto';
+import { sign, verify } from 'securex';
 
 const secretKey = await generateKey();
 
@@ -134,7 +134,7 @@ try {
 Encrypt any data type (objects, arrays, strings, numbers).
 
 ```javascript
-import { encryptData, decryptData } from 'encrypto';
+import { encryptData, decryptData } from 'securex';
 
 const userData = {
   id: 123,
@@ -153,7 +153,7 @@ const decrypted = await decryptData(encrypted, secretKey);
 Encrypt multiple tokens in parallel for better performance.
 
 ```javascript
-import { batchEncrypt, batchDecrypt } from 'encrypto';
+import { batchEncrypt, batchDecrypt } from 'securex';
 
 const tokens = ["token1", "token2", "token3"];
 const secretKey = await generateKey();
@@ -168,7 +168,7 @@ const decrypted = await batchDecrypt(encrypted, secretKey);
 Encrypt multiple data items in parallel.
 
 ```javascript
-import { batchData, batchDataDecrypt } from 'encrypto';
+import { batchData, batchDataDecrypt } from 'securex';
 
 const dataArray = [
   { id: 1, name: "User 1" },
@@ -280,7 +280,7 @@ Works in all modern browsers that support:
 ### Basic Usage
 
 ```javascript
-import { generateKey, encryptToken, decryptToken } from 'encrypto';
+import { generateKey, encryptToken, decryptToken } from 'securex';
 
 // Generate key once, store securely
 const secretKey = await generateKey();
@@ -296,7 +296,7 @@ const decrypted = await decryptToken(encrypted, secretKey);
 ### JWT Alternative
 
 ```javascript
-import { sign, verify } from 'encrypto';
+import { sign, verify } from 'securex';
 
 const secretKey = process.env.ENCRYPTION_KEY;
 
@@ -315,7 +315,7 @@ try {
 ### High Performance Batch Processing
 
 ```javascript
-import { batchEncrypt, batchDecrypt } from 'encrypto';
+import { batchEncrypt, batchDecrypt } from 'securex';
 
 // Process 1000 tokens efficiently
 const tokens = Array.from({length: 1000}, (_, i) => `token-${i}`);
@@ -394,7 +394,7 @@ If you have found a bug or feature request, please report them at this repositor
 | **Error Handling** | All methods | Always wrap in try-catch, never expose error details to users |
 | **Data Validation** | All methods | Validate input data before encryption, sanitize after decryption |
 
-## Why encrypto is Future-Proof
+## Why securex is Future-Proof
 
 **Traditional packages fail because:**
 - JWT: Anyone can decode tokens instantly
@@ -402,7 +402,7 @@ If you have found a bug or feature request, please report them at this repositor
 - MD5/SHA1: Already broken by hackers
 - crypto-js: Uses outdated algorithms
 
-**encrypto survives because:**
+**securex survives because:**
 - **AES-256-GCM**: Approved by NSA for TOP SECRET data
 - **Authenticated encryption**: Detects tampering automatically  
 - **Random IVs**: Every encryption is unique
@@ -416,7 +416,7 @@ If you have found a bug or feature request, please report them at this repositor
 
 🚀 **Full-Stack Developer & Security Enthusiast**
 
-[![GitHub](https://img.shields.io/badge/GitHub-Shahwaiz24-black?style=for-the-badge&logo=github)](https://github.com/Shahwaiz24/encrypto)
+[![GitHub](https://img.shields.io/badge/GitHub-Shahwaiz24-black?style=for-the-badge&logo=github)](https://github.com/Shahwaiz24/securex)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Shahwaiz%20Afzal-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/shahwaiz-afzal-dev/)
 
 *"Making encryption accessible to every developer while maintaining military-grade security standards."*

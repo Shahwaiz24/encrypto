@@ -5,7 +5,7 @@ export default {
     output: {
         dir: 'dist',
         format: 'es',
-        name: 'encrypto',
+        name: 'securex',
     },
     plugins: [
         typescript({

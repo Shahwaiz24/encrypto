@@ -145,12 +145,7 @@ class TokenSecurityService {
             );
         }
 
-        if (token.length === 0) {
-            throw new Error(
-                "🎫 Token cannot be empty.\n" +
-                "💡 Provide a non-empty string token to encrypt."
-            );
-        }
+        // Note: Empty strings are allowed - they are valid data to encrypt
 
         if (this.isBrowser) {
             const iv = crypto.getRandomValues(new Uint8Array(this.ivLength));
@@ -210,10 +205,10 @@ class TokenSecurityService {
 
         if (this.isBrowser) {
             const combined = this.fromBase64(encryptedToken);
-            if (combined.length < this.ivLength + this.tagLength + 1) {
+            if (combined.length < this.ivLength + this.tagLength) {
                 throw new Error(
                     "🔓 Invalid encrypted token format.\n" +
-                    `📏 Token too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength + 1} bytes)\n` +
+                    `📏 Token too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength} bytes)\n` +
                     "💡 Token may be corrupted or invalid. Try encrypting again."
                 );
             }
@@ -230,10 +225,10 @@ class TokenSecurityService {
             const crypto = await import('node:crypto');
             // Decode from base64
             const combined = Buffer.from(encryptedToken, "base64");
-            if (combined.length < this.ivLength + this.tagLength + 1) {
+            if (combined.length < this.ivLength + this.tagLength) {
                 throw new Error(
                     "🔓 Invalid encrypted token format.\n" +
-                    `📏 Token too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength + 1} bytes)\n` +
+                    `📏 Token too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength} bytes)\n` +
                     "💡 Token may be corrupted or invalid. Try encrypting again."
                 );
             }
@@ -262,7 +257,7 @@ class TokenSecurityService {
             } else {
                 decoded = Buffer.from(token, "base64");
             }
-            return decoded.length >= this.ivLength + this.tagLength + 1;
+            return decoded.length >= this.ivLength + this.tagLength;
         } catch {
             return false;
         }

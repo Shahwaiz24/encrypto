@@ -410,9 +410,16 @@ If you have found a bug or feature request, please report them at this repositor
 - **No known vulnerabilities**: Perfect security record
 
 
-### **Author**
+## Author
 
+**Built with ❤️ by [Shahwaiz Afzal](https://github.com/Shahwaiz24)**
 
+🚀 **Full-Stack Developer & Security Enthusiast**
+
+[![GitHub](https://img.shields.io/badge/GitHub-Shahwaiz24-black?style=for-the-badge&logo=github)](https://github.com/Shahwaiz24/encrypto)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Shahwaiz%20Afzal-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/shahwaiz-afzal-dev/)
+
+*"Making encryption accessible to every developer while maintaining military-grade security standards."*
 
 ---
 

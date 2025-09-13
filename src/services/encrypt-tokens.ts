@@ -43,34 +43,19 @@ class TokenSecurityService {
     constructor(secretKey: string) {
         // Enhanced validation with developer-friendly error messages
         if (!secretKey) {
-            throw new Error(
-                "🔑 Secret key is required!\n" +
-                "💡 Generate one using: const key = await generateSecretKey()\n" +
-                "📁 Store it securely in your .env file: TOKEN_ENCRYPTION_KEY=your_key_here"
-            );
+            throw new Error("Secret key is required");
         }
 
         if (typeof secretKey !== 'string') {
-            throw new Error(
-                "🔑 Secret key must be a string.\n" +
-                `📝 Received: ${typeof secretKey} instead of string`
-            );
+            throw new Error("Secret key must be a string");
         }
 
         if (secretKey.length !== 64) {
-            throw new Error(
-                "🔑 Secret key must be exactly 64 characters (256 bits).\n" +
-                `📏 Current length: ${secretKey.length} characters\n` +
-                "💡 Generate a valid key using: const key = await generateSecretKey()"
-            );
+            throw new Error("Secret key must be exactly 64 characters");
         }
 
         if (!/^[0-9a-f]+$/i.test(secretKey)) {
-            throw new Error(
-                "🔑 Secret key must be a valid HEX string (0-9, a-f characters only).\n" +
-                "❌ Invalid characters detected in key\n" +
-                "💡 Generate a valid key using: const key = await generateSecretKey()"
-            );
+            throw new Error("Secret key must be a valid HEX string");
         }
 
         // Security reminder for development (only once per process - shared across all securex services)
@@ -130,18 +115,11 @@ class TokenSecurityService {
     async encryptToken(token: string): Promise<string> {
         // Enhanced input validation with helpful messages
         if (token === null || token === undefined) {
-            throw new Error(
-                "🎫 Token cannot be null or undefined.\n" +
-                "💡 Provide a valid string token to encrypt."
-            );
+            throw new Error("Token cannot be null or undefined");
         }
 
         if (typeof token !== "string") {
-            throw new Error(
-                "🎫 Token must be a string.\n" +
-                `📝 Received: ${typeof token}\n` +
-                "💡 Convert your data to string before encryption."
-            );
+            throw new Error("Token must be a string");
         }
 
         // Note: Empty strings are allowed - they are valid data to encrypt
@@ -172,7 +150,7 @@ class TokenSecurityService {
 
             const combined = Buffer.concat([iv, encrypted, tag]);
             // Using base64 instead of base64url for slightly shorter output
-            return combined.toString("base64");
+            return combined.toString("base64url");
         }
     }
 
@@ -182,34 +160,21 @@ class TokenSecurityService {
     async decryptToken(encryptedToken: string): Promise<string> {
         // Enhanced input validation with helpful messages  
         if (encryptedToken === null || encryptedToken === undefined) {
-            throw new Error(
-                "🔓 Encrypted token cannot be null or undefined.\n" +
-                "💡 Provide a valid encrypted token string."
-            );
+            throw new Error("Encrypted token cannot be null or undefined");
         }
 
         if (typeof encryptedToken !== "string") {
-            throw new Error(
-                "🔓 Encrypted token must be a string.\n" +
-                `📝 Received: ${typeof encryptedToken}`
-            );
+            throw new Error("Encrypted token must be a string");
         }
 
         if (encryptedToken.length === 0) {
-            throw new Error(
-                "🔓 Encrypted token cannot be empty.\n" +
-                "💡 Provide a valid encrypted token string."
-            );
+            throw new Error("Encrypted token cannot be empty");
         }
 
         if (this.isBrowser) {
             const combined = this.fromBase64(encryptedToken);
             if (combined.length < this.ivLength + this.tagLength) {
-                throw new Error(
-                    "🔓 Invalid encrypted token format.\n" +
-                    `📏 Token too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength} bytes)\n` +
-                    "💡 Token may be corrupted or invalid. Try encrypting again."
-                );
+                throw new Error("Invalid encrypted token format");
             }
 
             const iv = combined.slice(0, this.ivLength);
@@ -223,13 +188,9 @@ class TokenSecurityService {
             // Dynamic import for Node.js crypto
             const crypto = await import('node:crypto');
             // Decode from base64
-            const combined = Buffer.from(encryptedToken, "base64");
+            const combined = Buffer.from(encryptedToken, "base64url");
             if (combined.length < this.ivLength + this.tagLength) {
-                throw new Error(
-                    "🔓 Invalid encrypted token format.\n" +
-                    `📏 Token too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength} bytes)\n` +
-                    "💡 Token may be corrupted or invalid. Try encrypting again."
-                );
+                throw new Error("Invalid encrypted token format");
             }
 
             const iv = combined.slice(0, this.ivLength);
@@ -254,7 +215,7 @@ class TokenSecurityService {
             if (this.isBrowser) {
                 decoded = this.fromBase64(token);
             } else {
-                decoded = Buffer.from(token, "base64");
+                decoded = Buffer.from(token, "base64url");
             }
             return decoded.length >= this.ivLength + this.tagLength;
         } catch {
@@ -270,11 +231,14 @@ class TokenSecurityService {
         buffer.forEach((b) => {
             str += String.fromCharCode(b);
         });
-        return btoa(str);
+        return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     }
 
     private fromBase64(base64: string): Uint8Array {
-        const binary = atob(base64);
+        // Convert base64url back to base64
+        const base64Standard = base64.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64Standard + '='.repeat((4 - base64Standard.length % 4) % 4);
+        const binary = atob(padded);
         const len = binary.length;
         const bytes = new Uint8Array(len);
         for (let i = 0; i < len; i++) {
@@ -292,20 +256,14 @@ const getTokenService = (secretKey: string): TokenSecurityService => {
 // Exports - secretKey is mandatory
 const encryptToken = async (token: string, secretKey: string): Promise<string> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for encryption!\n" +
-            "💡 Generate one using: const key = await generateSecretKey()"
-        );
+        throw new Error("Secret key is required");
     }
     return getTokenService(secretKey).encryptToken(token);
 };
 
 const decryptToken = async (encryptedToken: string, secretKey: string): Promise<string> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for decryption!\n" +
-            "💡 Use the same key that was used for encryption"
-        );
+        throw new Error("Secret key is required");
     }
     return getTokenService(secretKey).decryptToken(encryptedToken);
 };
@@ -314,81 +272,58 @@ const generateKey = async () => {
 };
 
 /**
- * 🕐 Sign token with expiry (JWT alternative) - like jwt.sign()
+ * Sign data with expiry (JWT alternative) - like jwt.sign()
  */
-const sign = async (token: string, secretKey: string, expiryMinutes: number = 60): Promise<string> => {
+const sign = async (data: any, secretKey: string, expiryMinutes: number = 60): Promise<string> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for token encryption with expiry!\n" +
-            "💡 Generate one using: const key = await generateSecretKey()"
-        );
+        throw new Error("Secret key is required");
     }
 
-    if (!token || typeof token !== "string") {
-        throw new Error(
-            "🎫 Token must be a non-empty string.\n" +
-            "💡 Provide a valid string token to encrypt with expiry."
-        );
+    if (data === undefined) {
+        throw new Error("Data cannot be undefined");
     }
 
     if (typeof expiryMinutes !== "number" || expiryMinutes <= 0) {
-        throw new Error(
-            "⏱️ Expiry must be a positive number (minutes).\n" +
-            "💡 Example: 60 for 1 hour, 1440 for 24 hours."
-        );
+        throw new Error("Expiry must be a positive number (minutes)");
     }
 
     const tokenData = {
-        token: token,
+        data: data,
         exp: Date.now() + (expiryMinutes * 60 * 1000),
         iat: Date.now()
     };
 
-    return getTokenService(secretKey).encryptToken(JSON.stringify(tokenData));
+    return getTokenService(secretKey).encryptToken(JSON.stringify(tokenData, null, 0));
 };
 
 /**
- * 🕐 Verify token with expiry validation - like jwt.verify()
+ * Verify signed data with expiry validation - like jwt.verify()
  */
-const verify = async (encryptedToken: string, secretKey: string): Promise<string> => {
+const verify = async (signedToken: string, secretKey: string): Promise<any> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for token decryption with expiry!\n" +
-            "💡 Use the same key that was used for encryption"
-        );
+        throw new Error("Secret key is required");
     }
 
     try {
-        const decryptedString = await getTokenService(secretKey).decryptToken(encryptedToken);
+        const decryptedString = await getTokenService(secretKey).decryptToken(signedToken);
         const tokenData = JSON.parse(decryptedString);
 
         // Validate token structure
-        if (!tokenData.token || !tokenData.exp || !tokenData.iat) {
-            throw new Error(
-                "🎫 Invalid token format. This token was not created with expiry.\n" +
-                "💡 Use regular decryptToken() for non-expiring tokens."
-            );
+        if (!tokenData.data || !tokenData.exp || !tokenData.iat) {
+            throw new Error("Invalid token format");
         }
 
         // Check if token has expired
         if (Date.now() > tokenData.exp) {
-            const expiredDate = new Date(tokenData.exp).toISOString();
-            throw new Error(
-                `🕐 Token has expired!\n` +
-                `⏰ Expired at: ${expiredDate}\n` +
-                `💡 Create a new token or increase expiry time.`
-            );
+            throw new Error("Token has expired");
         }
 
-        return tokenData.token;
+        return tokenData.data;
     } catch (error) {
-        if (error instanceof Error && (error.message.includes('🕐') || error.message.includes('🎫'))) {
+        if (error instanceof Error && (error.message.includes('expired') || error.message.includes('Invalid'))) {
             throw error; // Re-throw our custom errors
         }
-        throw new Error(
-            "🔓 Failed to decrypt token with expiry.\n" +
-            "💡 Token may be corrupted or encrypted with a different key."
-        );
+        throw new Error("Failed to verify token");
     }
 };
 
@@ -397,24 +332,15 @@ const verify = async (encryptedToken: string, secretKey: string): Promise<string
  */
 const batchEncrypt = async (tokens: string[], secretKey: string): Promise<string[]> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for batch token encryption!\n" +
-            "💡 Generate one using: const key = await generateSecretKey()"
-        );
+        throw new Error("Secret key is required");
     }
 
     if (!Array.isArray(tokens)) {
-        throw new Error(
-            "🎫 Tokens must be an array of strings.\n" +
-            "💡 Example: ['token1', 'token2', 'token3']"
-        );
+        throw new Error("Tokens must be an array of strings");
     }
 
     if (tokens.length === 0) {
-        throw new Error(
-            "🎫 Tokens array cannot be empty.\n" +
-            "💡 Provide at least one token to encrypt."
-        );
+        throw new Error("Tokens array cannot be empty");
     }
 
     const service = getTokenService(secretKey);
@@ -428,10 +354,7 @@ const batchEncrypt = async (tokens: string[], secretKey: string): Promise<string
             }
             return await service.encryptToken(token);
         } catch (error) {
-            throw new Error(
-                `🎫 Failed to encrypt token at index ${index}.\n` +
-                `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-            );
+            throw new Error(`Failed to encrypt token at index ${index}`);
         }
     });
 
@@ -443,24 +366,15 @@ const batchEncrypt = async (tokens: string[], secretKey: string): Promise<string
  */
 const batchDecrypt = async (encryptedTokens: string[], secretKey: string): Promise<string[]> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for batch token decryption!\n" +
-            "💡 Use the same key that was used for encryption"
-        );
+        throw new Error("Secret key is required");
     }
 
     if (!Array.isArray(encryptedTokens)) {
-        throw new Error(
-            "🔓 Encrypted tokens must be an array of strings.\n" +
-            "💡 Example: [encryptedToken1, encryptedToken2, encryptedToken3]"
-        );
+        throw new Error("Encrypted tokens must be an array of strings");
     }
 
     if (encryptedTokens.length === 0) {
-        throw new Error(
-            "🔓 Encrypted tokens array cannot be empty.\n" +
-            "💡 Provide at least one encrypted token to decrypt."
-        );
+        throw new Error("Encrypted tokens array cannot be empty");
     }
 
     const service = getTokenService(secretKey);
@@ -473,10 +387,7 @@ const batchDecrypt = async (encryptedTokens: string[], secretKey: string): Promi
             }
             return await service.decryptToken(encryptedToken);
         } catch (error) {
-            throw new Error(
-                `🔓 Failed to decrypt token at index ${index}.\n` +
-                `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-            );
+            throw new Error(`Failed to decrypt token at index ${index}`);
         }
     });
 

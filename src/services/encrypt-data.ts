@@ -43,34 +43,19 @@ class DataSecurityService {
     constructor(secretKey: string) {
         // Enhanced validation with developer-friendly error messages
         if (!secretKey) {
-            throw new Error(
-                "🔑 Secret key is required!\n" +
-                "💡 Generate one using: const key = await generateSecretKey()\n" +
-                "📁 Store it securely in your .env file: TOKEN_ENCRYPTION_KEY=your_key_here"
-            );
+            throw new Error("Secret key is required");
         }
 
         if (typeof secretKey !== 'string') {
-            throw new Error(
-                "🔑 Secret key must be a string.\n" +
-                `📝 Received: ${typeof secretKey} instead of string`
-            );
+            throw new Error("Secret key must be a string");
         }
 
         if (secretKey.length !== 64) {
-            throw new Error(
-                "🔑 Secret key must be exactly 64 characters (256 bits).\n" +
-                `📏 Current length: ${secretKey.length} characters\n` +
-                "💡 Generate a valid key using: const key = await generateSecretKey()"
-            );
+            throw new Error("Secret key must be exactly 64 characters");
         }
 
         if (!/^[0-9a-f]+$/i.test(secretKey)) {
-            throw new Error(
-                "🔑 Secret key must be a valid HEX string (0-9, a-f characters only).\n" +
-                "❌ Invalid characters detected in key\n" +
-                "💡 Generate a valid key using: const key = await generateSecretKey()"
-            );
+            throw new Error("Secret key must be a valid HEX string");
         }
 
         // Security reminder for development (only once per process - shared across all securex services)
@@ -130,23 +115,16 @@ class DataSecurityService {
     async encryptData(data: any): Promise<string> {
         // Enhanced validation - allow any data type except undefined
         if (data === undefined) {
-            throw new Error(
-                "📦 Cannot encrypt undefined data.\n" +
-                "💡 Provide any valid data type (string, number, object, array, null, boolean)."
-            );
+            throw new Error("Cannot encrypt undefined data");
         }
 
         // Convert data to JSON string (supports unlimited data size)
         let dataString: string;
         try {
-            dataString = JSON.stringify(data);
+            dataString = JSON.stringify(data, null, 0);
             // No maximum length restriction - handle any size data
         } catch (error) {
-            throw new Error(
-                "📦 Failed to serialize data to JSON.\n" +
-                `❌ Error: ${error instanceof Error ? error.message : 'Unknown serialization error'}\n` +
-                "💡 Ensure your data doesn't contain circular references or unsupported types."
-            );
+            throw new Error("Failed to serialize data to JSON");
         }
 
         if (this.isBrowser) {
@@ -175,7 +153,7 @@ class DataSecurityService {
 
             const combined = Buffer.concat([iv, encrypted, tag]);
             // Using base64 for shorter output
-            return combined.toString("base64");
+            return combined.toString("base64url");
         }
     }
 
@@ -185,24 +163,15 @@ class DataSecurityService {
     async decryptData(encryptedData: string): Promise<any> {
         // Enhanced input validation
         if (encryptedData === null || encryptedData === undefined) {
-            throw new Error(
-                "🔓 Encrypted data cannot be null or undefined.\n" +
-                "💡 Provide a valid encrypted data string."
-            );
+            throw new Error("Encrypted data cannot be null or undefined");
         }
 
         if (typeof encryptedData !== "string") {
-            throw new Error(
-                "🔓 Encrypted data must be a string.\n" +
-                `📝 Received: ${typeof encryptedData}`
-            );
+            throw new Error("Encrypted data must be a string");
         }
 
         if (encryptedData.length === 0) {
-            throw new Error(
-                "🔓 Encrypted data cannot be empty.\n" +
-                "💡 Provide a valid encrypted data string."
-            );
+            throw new Error("Encrypted data cannot be empty");
         }
 
         let decryptedString: string;
@@ -210,11 +179,7 @@ class DataSecurityService {
         if (this.isBrowser) {
             const combined = this.fromBase64(encryptedData);
             if (combined.length < this.ivLength + this.tagLength + 1) {
-                throw new Error(
-                    "🔓 Invalid encrypted data format.\n" +
-                    `📏 Data too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength + 1} bytes)\n` +
-                    "💡 Data may be corrupted or invalid. Try encrypting again."
-                );
+                throw new Error("Invalid encrypted data format");
             }
 
             const iv = combined.slice(0, this.ivLength);
@@ -228,13 +193,9 @@ class DataSecurityService {
             // Dynamic import for Node.js crypto
             const crypto = await import('node:crypto');
             // Decode from base64
-            const combined = Buffer.from(encryptedData, "base64");
+            const combined = Buffer.from(encryptedData, "base64url");
             if (combined.length < this.ivLength + this.tagLength + 1) {
-                throw new Error(
-                    "🔓 Invalid encrypted data format.\n" +
-                    `📏 Data too short: ${combined.length} bytes (minimum: ${this.ivLength + this.tagLength + 1} bytes)\n` +
-                    "💡 Data may be corrupted or invalid. Try encrypting again."
-                );
+                throw new Error("Invalid encrypted data format");
             }
 
             const iv = combined.slice(0, this.ivLength);
@@ -252,11 +213,7 @@ class DataSecurityService {
         try {
             return JSON.parse(decryptedString);
         } catch (error) {
-            throw new Error(
-                "📦 Failed to parse decrypted data from JSON.\n" +
-                `❌ Parse error: ${error instanceof Error ? error.message : 'Unknown parsing error'}\n` +
-                "💡 Data may be corrupted or encrypted with a different key."
-            );
+            throw new Error("Failed to parse decrypted data from JSON");
         }
     }
 
@@ -271,7 +228,7 @@ class DataSecurityService {
             if (this.isBrowser) {
                 decoded = this.fromBase64(data);
             } else {
-                decoded = Buffer.from(data, "base64");
+                decoded = Buffer.from(data, "base64url");
             }
             return decoded.length >= this.ivLength + this.tagLength + 1;
         } catch {
@@ -287,11 +244,14 @@ class DataSecurityService {
         buffer.forEach((b) => {
             str += String.fromCharCode(b);
         });
-        return btoa(str);
+        return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
     }
 
     private fromBase64(base64: string): Uint8Array {
-        const binary = atob(base64);
+        // Convert base64url back to base64
+        const base64Standard = base64.replace(/-/g, '+').replace(/_/g, '/');
+        const padded = base64Standard + '='.repeat((4 - base64Standard.length % 4) % 4);
+        const binary = atob(padded);
         const len = binary.length;
         const bytes = new Uint8Array(len);
         for (let i = 0; i < len; i++) {
@@ -309,20 +269,14 @@ const getDataService = (secretKey: string): DataSecurityService => {
 // Exports - secretKey is mandatory
 const encryptData = async (data: any, secretKey: string): Promise<string> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for data encryption!\n" +
-            "💡 Generate one using: const key = await generateSecretKey()"
-        );
+        throw new Error("Secret key is required");
     }
     return getDataService(secretKey).encryptData(data);
 };
 
 const decryptData = async (encryptedData: string, secretKey: string): Promise<any> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for data decryption!\n" +
-            "💡 Use the same key that was used for encryption"
-        );
+        throw new Error("Secret key is required");
     }
     return getDataService(secretKey).decryptData(encryptedData);
 };
@@ -332,24 +286,15 @@ const decryptData = async (encryptedData: string, secretKey: string): Promise<an
  */
 const batchData = async (dataArray: any[], secretKey: string): Promise<string[]> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for batch data encryption!\n" +
-            "💡 Generate one using: const key = await generateSecretKey()"
-        );
+        throw new Error("Secret key is required");
     }
 
     if (!Array.isArray(dataArray)) {
-        throw new Error(
-            "📦 Data must be an array of items to encrypt.\n" +
-            "💡 Example: [data1, data2, data3]"
-        );
+        throw new Error("Data must be an array of items to encrypt");
     }
 
     if (dataArray.length === 0) {
-        throw new Error(
-            "📦 Data array cannot be empty.\n" +
-            "💡 Provide at least one data item to encrypt."
-        );
+        throw new Error("Data array cannot be empty");
     }
 
     const service = getDataService(secretKey);
@@ -362,10 +307,7 @@ const batchData = async (dataArray: any[], secretKey: string): Promise<string[]>
             }
             return await service.encryptData(data);
         } catch (error) {
-            throw new Error(
-                `📦 Failed to encrypt data at index ${index}.\n` +
-                `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-            );
+            throw new Error(`Failed to encrypt data at index ${index}`);
         }
     });
 
@@ -377,24 +319,15 @@ const batchData = async (dataArray: any[], secretKey: string): Promise<string[]>
  */
 const batchDataDecrypt = async (encryptedDataArray: string[], secretKey: string): Promise<any[]> => {
     if (!secretKey) {
-        throw new Error(
-            "🔑 Secret key is required for batch data decryption!\n" +
-            "💡 Use the same key that was used for encryption"
-        );
+        throw new Error("Secret key is required");
     }
 
     if (!Array.isArray(encryptedDataArray)) {
-        throw new Error(
-            "🔓 Encrypted data must be an array of strings.\n" +
-            "💡 Example: [encryptedData1, encryptedData2, encryptedData3]"
-        );
+        throw new Error("Encrypted data must be an array of strings");
     }
 
     if (encryptedDataArray.length === 0) {
-        throw new Error(
-            "🔓 Encrypted data array cannot be empty.\n" +
-            "💡 Provide at least one encrypted data item to decrypt."
-        );
+        throw new Error("Encrypted data array cannot be empty");
     }
 
     const service = getDataService(secretKey);
@@ -407,10 +340,7 @@ const batchDataDecrypt = async (encryptedDataArray: string[], secretKey: string)
             }
             return await service.decryptData(encryptedData);
         } catch (error) {
-            throw new Error(
-                `🔓 Failed to decrypt data at index ${index}.\n` +
-                `❌ Error: ${error instanceof Error ? error.message : 'Unknown error'}`
-            );
+            throw new Error(`Failed to decrypt data at index ${index}`);
         }
     });
 

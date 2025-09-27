@@ -1,7 +1,6 @@
 export {
     encryptToken,
     decryptToken,
-    // Short & developer-friendly names! 🚀
     generateKey,
     sign,
     verify,
@@ -11,7 +10,6 @@ export {
 export {
     encryptData,
     decryptData,
-    // Short batch operations! 🚀
     batchData,
     batchDataDecrypt
 } from './services/encrypt-data';

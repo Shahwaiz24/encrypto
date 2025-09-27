@@ -1,6 +1,6 @@
 {
   "name": "securex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
@@ -9,10 +9,27 @@
     "dev": "tsc --watch",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "encryption",
+    "aes-256-gcm",
+    "crypto",
+    "jwt-alternative",
+    "token-encryption",
+    "secure-tokens",
+    "data-protection",
+    "quantum-resistant",
+    "military-grade-encryption",
+    "nodejs-encryption",
+    "typescript-crypto",
+    "browser-encryption",
+    "securex",
+    "encrypted-data",
+    "verify-sign",
+    "crypto-library"
+  ],
+  "author": "Shahwaiz Afzal <shahwaizafzal90@gmail.com> (https://github.com/Shahwaiz24)",
   "license": "ISC",
-  "description": "",
+  "description": "Military-grade AES-256-GCM encryption library for tokens and data, a secure JWT alternative",
   "devDependencies": {
     "@rollup/plugin-typescript": "^12.1.4",
     "@types/node": "^24.3.1",

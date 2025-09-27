@@ -420,7 +420,3 @@ If you have found a bug or feature request, please report them at this repositor
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Shahwaiz%20Afzal-blue?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/shahwaiz-afzal-dev/)
 
 *"Making encryption accessible to every developer while maintaining military-grade security standards."*
-
----
-
-**Keywords:** encryption, aes-256-gcm, jwt-alternative, quantum-resistant, military-grade, token-security, data-protection, unbreakable-encryption, jwt , jsonwebtoken, encrypted, crypto,hashing
